@@ -80,7 +80,7 @@ while True:
 
             for item in lista_valor:
                 sql_query = """
-                INSERT INTO Captura (fkDispositivo, fkNR,fkComponente, registro, dataRegistro)
+                INSERT INTO captura (fkDispositivo, fkNR,fkComponente, registro, dataRegistro)
                 VALUES (%s, %s,%s, %s, current_timestamp())
                 """
                 val = (fkDispositivo, fkNR,lista_idComponente[i],item)
@@ -96,7 +96,7 @@ while True:
                 if(lista_variavel[i] == "PercCPU" and PercCPU > 70.0):
                         descricao = f"Porcentual de uso de CPU está em risco! CPU: {PercCPU}"
                         
-                        sql_query = "INSERT INTO Alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
+                        sql_query = "INSERT INTO alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
                         val = [idUltimoDado, fkNR, descricao]
                         mycursor.execute(sql_query, val)
                         mydb.commit()
@@ -104,7 +104,7 @@ while True:
                 if(lista_variavel[i] == "PercMEM" and PercMEM > 75.0):
                         descricao = f"Porcentual de uso de memória RAM está em risco! RAM: {PercMEM}"
 
-                        sql_query = "INSERT INTO Alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
+                        sql_query = "INSERT INTO alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
                         val = [idUltimoDado, fkNR, descricao]
                         mycursor.execute(sql_query, val)
                         mydb.commit()
@@ -118,7 +118,7 @@ while True:
 
             for item in lista_valor:
                 sql_query = """
-                    INSERT INTO Captura (fkDispositivo, fkNR, fkComponente, registro, dataRegistro)
+                    INSERT INTO captura (fkDispositivo, fkNR, fkComponente, registro, dataRegistro)
                     VALUES (%s, %s,%s, %s, current_timestamp())
                     """
                 val = (fkDispositivo, fkNR,lista_idComponente[i],item)
@@ -144,7 +144,7 @@ while True:
                 PercDISCO = psutil.disk_usage('/').percent
 
             sql_query = """
-                INSERT INTO Captura (fkDispositivo, fkNR, fkComponente, registro, dataRegistro)
+                INSERT INTO captura (fkDispositivo, fkNR, fkComponente, registro, dataRegistro)
                 VALUES (%s, %s, %s, %s, current_timestamp())
                 """
             val = (fkDispositivo, fkNR,idComponente, PercDISCO)
@@ -159,7 +159,7 @@ while True:
             if(PercDISCO > 80.0):
                 descricao = f"Porcentual de uso de disco está em risco! disk: {PercDISCO}"
 
-                sql_query = "INSERT INTO Alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
+                sql_query = "INSERT INTO alerta(fkCaptura, fkNR, dataAlerta, descricao) VALUES (%s, %s, current_timestamp(), %s);"
                 val = [idUltimoDadoDISK, fkNR, descricao]
                 mycursor.execute(sql_query, val)
                 mydb.commit()
