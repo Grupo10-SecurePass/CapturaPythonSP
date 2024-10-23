@@ -32,7 +32,9 @@ try:
             select = mycursor.fetchall()
             fkDispositivo = select[0][0]
             fkNR = select[0][1]
-                 
+
+            print(f"fkDispositivo: {fkDispositivo}")
+            print(f"fkNR: {fkNR}")
 
 except Error as e:
         print("Erro ao conectar com o MySQL (parte da fkDispositivo):", e)
@@ -86,6 +88,7 @@ while True:
                 val = (fkDispositivo, fkNR,lista_idComponente[i],item)
                 mycursor.execute(sql_query, val)
                 mydb.commit()
+                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[i]} e valor = {item}")
 
                 #pego a fkCaptura pegando o último dado que foi inserido
                 result = mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
@@ -100,6 +103,7 @@ while True:
                         val = [idUltimoDado, fkNR, descricao]
                         mycursor.execute(sql_query, val)
                         mydb.commit()
+                        print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
 
                 if(lista_variavel[i] == "PercMEM" and PercMEM > 75.0):
                         descricao = f"Porcentual de uso de memória RAM está em risco! RAM: {PercMEM}"
@@ -108,6 +112,7 @@ while True:
                         val = [idUltimoDado, fkNR, descricao]
                         mycursor.execute(sql_query, val)
                         mydb.commit()
+                        print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
 
                 i += 1
 
@@ -124,6 +129,7 @@ while True:
                 val = (fkDispositivo, fkNR,lista_idComponente[i],item)
                 mycursor.execute(sql_query, val)
                 mydb.commit()
+                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[i]} e valor = {item}")
                 i += 1
                 
                 print(mycursor.rowcount, "registro inserido")
@@ -150,6 +156,7 @@ while True:
             val = (fkDispositivo, fkNR,idComponente, PercDISCO)
             mycursor.execute(sql_query, val)
             mydb.commit()
+            print(f"Dado inserido em 'captura' com fkComponente = {idComponente} e valor = {PercDISCO}")
 
             result = mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
             idUltimoDadoDISK = mycursor.fetchall()
@@ -163,8 +170,8 @@ while True:
                 val = [idUltimoDadoDISK, fkNR, descricao]
                 mycursor.execute(sql_query, val)
                 mydb.commit()
+                print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDadoDISK} e descrição = '{descricao}'")
 
-                 
 
     except Error as e:
         print("Erro ao conectar com o MySQL:", e)
