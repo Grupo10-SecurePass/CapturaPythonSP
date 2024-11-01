@@ -3,10 +3,15 @@ import psutil
 import time
 import os
 import platform
+import pingparsing
 from dotenv import load_dotenv
 import socket #serve para pegar o nome da máquina
 
 load_dotenv()
+
+#pegando nome do dispositivo
+nome_dispositivo = socket.gethostname()
+ip_maquina = socket.gethostbyname(nome_dispositivo)
 
 #vejo sistema operacional
 SO = platform.system()
@@ -25,8 +30,6 @@ try:
         mydb = connect(**config)
         if mydb.is_connected():
             mycursor = mydb.cursor()
-
-            nome_dispositivo = socket.gethostname()
 
             result = mycursor.execute(f"SELECT idDispositivo, fkNR FROM dispositivo WHERE nome LIKE '%{nome_dispositivo}%';")
             select = mycursor.fetchall()
@@ -54,13 +57,21 @@ contador_disco = 0
 while True:
     PercCPU = psutil.cpu_percent()
     PercMEM = psutil.virtual_memory().percent
+    FreqCPU = psutil.cpu_freq()
+
+    # Captura do tempo de resposta com pingparsing
+    transmitter = pingparsing.PingTransmitter()
+    transmitter.destination = ip_maquina
+    transmitter.count = 1
+    result = transmitter.ping()
+    ping_parser = pingparsing.PingParsing()
+    TempoResposta = ping_parser.parse(result).rtt_avg  # Armazenando tempo de resposta
+
 
     #listas para trabalhar com mais de um valor
-    lista_valor = [PercCPU, PercMEM]
-    lista_variavel = ["PercCPU", "PercMEM"]
+    lista_valor = [PercCPU, PercMEM, FreqCPU, TempoResposta]
+    lista_variavel = ["PercCPU", "PercMEM", "FreqCPU", "TempoResposta"]
     lista_idComponente = []
-
-
 
     try:
         # Conectar ao banco de dados
