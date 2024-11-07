@@ -31,13 +31,15 @@ try:
         if mydb.is_connected():
             mycursor = mydb.cursor()
 
-            result = mycursor.execute(f"SELECT idDispositivo, fkLinha FROM dispositivo WHERE nome LIKE '%{nome_dispositivo}%';")
+            result = mycursor.execute(f"SELECT idDispositivo, fkLinha, ipv4Catraca FROM dispositivo WHERE nome LIKE '%{nome_dispositivo}%';")
             select = mycursor.fetchall()
             fkDispositivo = select[0][0]
             fkLinha = select[0][1]
+            ip_catraca = select[0][2]
 
             print(f"fkDispositivo: {fkDispositivo}")
             print(f"fkLinha: {fkLinha}")
+            print(f"Ip da catraca: {ip_catraca}")
 
 except Error as e:
         print("Erro ao conectar com o MySQL (parte da fkDispositivo):", e)
@@ -55,13 +57,15 @@ finally:
 contador_disco = 0
 
 while True:
+    #Faça o nome da sua variável o mesmo que você inseriu na tabela componentes, porque não da certo se não estiver EXATAMENTE igual
     PercCPU = psutil.cpu_percent()
     PercMEM = psutil.virtual_memory().percent
-    FreqCPU = psutil.cpu_freq()
+    FreqCPU = psutil.cpu_freq().current
+    FreqCPU = FreqCPU / 1000
 
     # Captura do tempo de resposta com pingparsing
     transmitter = pingparsing.PingTransmitter()
-    transmitter.destination = "ip_catraca"
+    transmitter.destination = ip_catraca
     transmitter.count = 1
     result = transmitter.ping()
     ping_parser = pingparsing.PingParsing()
@@ -69,13 +73,13 @@ while True:
 
 
     #listas para trabalhar com mais de um valor
-    lista_valor = [PercCPU, PercMEM, FreqCPU, TempoResposta]
-    lista_variavel = ["PercCPU", "PercMEM", "FreqCPU", "TempoResposta"]
-    lista_nomeVariavel = ["porcentagem de CPU", "porcentagem de memória RAM", "frequência de CPU", "tempo de resposta"]
-    lista_idComponente = []
-    lista_limite = []
-    lista_tipoAlerta = []
-    lista_foraLimite = []
+    lista_valor = [PercCPU, PercMEM, FreqCPU, TempoResposta] #Coloque a variável na lista
+    lista_variavel = ["PercCPU", "PercMEM", "FreqCPU", "TempoResposta"] #Coloque o jeito que você chamou a variável, tem que ser igual ao banco
+    lista_nomeVariavel = ["porcentagem de CPU", "porcentagem de memória RAM", "frequência de CPU", "tempo de resposta"] #Serve para aparecer no alerta, para o usuário entender
+    lista_idComponente = [] #Os ids entram nessa lista com um select
+    lista_limite = [] #Os limites que existem no banco entram nessa lista
+    lista_tipoAlerta = [] #Identificação se o limite é um teto (ceil ou máximo) ou piso(floor ou mínimo)
+    lista_foraLimite = [] #Coloco todos os componentes que estão fora do limite nessa lista para inserir todos em alerta, vem em formato de "json"
 
     try:
         # Conectar ao banco de dados
@@ -90,6 +94,7 @@ while True:
             idComponente = idComponente[0][0]
             lista_idComponente.append(idComponente)
 
+        #select para pegar o valor do LIMITE e o seu tipo para identificar se é máximo ou mínimo
         for idComponente in lista_idComponente:
             result = mycursor.execute(f"SELECT valor, tipo FROM limite WHERE fkComponente = {idComponente} AND fkDispositivo = {fkDispositivo};")
             result = mycursor.fetchall()
@@ -103,10 +108,11 @@ while True:
         for index in range(len(lista_valor)):
             if lista_tipoAlerta[index] == "acima" and lista_valor[index] > lista_limite[index]:  # Caso de valores acima do limite
                 lista_foraLimite.append((lista_nomeVariavel[index], lista_valor[index], lista_limite[index], "acima"))
-            elif lista_tipoAlerta[index] == "abaixo" and lista_valor[index] < lista_limite[i]:  # Caso de valores abaixo do limite
+            elif lista_tipoAlerta[index] == "abaixo" and lista_valor[index] < lista_limite[index]:  # Caso de valores abaixo do limite
                 lista_foraLimite.append((lista_nomeVariavel[index], lista_valor[index], lista_limite[index], "abaixo"))
                 
-
+        #caso tenha algum componente fora do limite, ele entra nesse if para fazer o insert em captura 
+        #e insert em alerta dos componentes que precisam
         if len(lista_foraLimite) > 0:
 
             #serve para identificar na lista_idComponente, qual a fkComponente
