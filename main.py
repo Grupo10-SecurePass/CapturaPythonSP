@@ -137,7 +137,7 @@ while True:
                 if lista_variavel[i] == lista_foraLimite[i][0]:
                         descricao = f"{lista_foraLimite[i][0]} está {lista_foraLimite[i][3]} do limite de {lista_foraLimite[i][2]}: valor atual é {lista_foraLimite[i][1]}"
                         
-                        sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao) VALUES (%s, %s, %s, current_timestamp(), %s);"
+                        sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, current_timestamp(), %s, 0);"
                         val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
                         mycursor.execute(sql_query, val)
                         mydb.commit()
@@ -200,7 +200,7 @@ while True:
             if(PercDISCO > valor_limite):
                 descricao = f"Porcentual de uso de disco está acima do limite de {valor_limite}: valor atual é {PercDISCO}"
                 
-                sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao) VALUES (%s, %s, %s, current_timestamp(), %s);"
+                sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, current_timestamp(), %s, 0);"
                 val = [fkDispositivo, idUltimoDadoDISK, fkLinha, descricao]
                 mycursor.execute(sql_query, val)
                 mydb.commit()
