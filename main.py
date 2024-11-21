@@ -112,55 +112,50 @@ while True:
                 
         #caso tenha algum componente fora do limite, ele entra nesse if para fazer o insert em captura 
         #e insert em alerta dos componentes que precisam
+        # Modificação do bloco que manipula os índices
         if len(lista_foraLimite) > 0:
-
-            #serve para identificar na lista_idComponente, qual a fkComponente
-            i = 0
-
-            for item in lista_valor:
+            for idx, item in enumerate(lista_valor):
                 sql_query = """
                 INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
-                VALUES (%s, %s,%s, %s, current_timestamp())
+                VALUES (%s, %s, %s, %s, current_timestamp())
                 """
-                val = (fkDispositivo, fkLinha, lista_idComponente[i], item)
+                val = (fkDispositivo, fkLinha, lista_idComponente[idx], item)
                 mycursor.execute(sql_query, val)
                 mydb.commit()
-                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[i]} e valor = {item}")
+                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
 
-                #pego a fkCaptura pegando o último dado que foi inserido
-                result = mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
+                # Pegando o último idCaptura inserido
+                mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
                 idUltimoDado = mycursor.fetchall()
                 idUltimoDado = idUltimoDado[0][0]
 
-                #vejo com o índice qual é a variável da lista e se o valor dela ultrapassa o limite para fazer a descrição do alerta
-                if lista_variavel[i] == lista_foraLimite[i][0]:
-                        descricao = f"{lista_foraLimite[i][0]} está {lista_foraLimite[i][3]} do limite de {lista_foraLimite[i][2]}: valor atual é {lista_foraLimite[i][1]}"
-                        
-                        sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, current_timestamp(), %s, 0);"
-                        val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
-                        mycursor.execute(sql_query, val)
-                        mydb.commit()
-                        print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
+                # Verificando se o valor está fora do limite
+                if lista_variavel[idx] == lista_foraLimite[idx][0]:
+                    descricao = f"{lista_foraLimite[idx][0]} está {lista_foraLimite[idx][3]} do limite de {lista_foraLimite[idx][2]}: valor atual é {lista_foraLimite[idx][1]}"
 
-                i += 1
+                    sql_query = """
+                    INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
+                    VALUES (%s, %s, %s, current_timestamp(), %s, 0);
+                    """
+                    val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
+                    mycursor.execute(sql_query, val)
+                    mydb.commit()
+                    print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
 
         else:
-
-            # Inserir dados na tabela
-            i = 0
-
-            for item in lista_valor:
+            # Inserindo os valores em captura quando não há alertas
+            for idx, item in enumerate(lista_valor):
                 sql_query = """
-                    INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
-                    VALUES (%s, %s,%s, %s, current_timestamp())
-                    """
-                val = (fkDispositivo, fkLinha, lista_idComponente[i],item)
+                INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
+                VALUES (%s, %s, %s, %s, current_timestamp())
+                """
+                val = (fkDispositivo, fkLinha, lista_idComponente[idx], item)
                 mycursor.execute(sql_query, val)
                 mydb.commit()
-                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[i]} e valor = {item}")
-                i += 1
-                
-                print(mycursor.rowcount, "registro inserido")
+                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
+
+        print(f"{mycursor.rowcount} registros inseridos.")
+
 
 
         #cada dado de cpu e ram será cadastrado a cada 30 segundos e dessa forma a cada 120 dados pegos, irá inserir um dado de disco (30 segundos = 120 dados em uma hora)
