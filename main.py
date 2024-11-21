@@ -11,7 +11,6 @@ load_dotenv()
 
 #pegando nome do dispositivo
 nome_dispositivo = socket.gethostname()
-ip_maquina = socket.gethostbyname(nome_dispositivo)
 
 #vejo sistema operacional
 SO = platform.system()
