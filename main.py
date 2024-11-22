@@ -114,34 +114,35 @@ while True:
         #e insert em alerta dos componentes que precisam
         # Modificação do bloco que manipula os índices
         if len(lista_foraLimite) > 0:
-            for idx, item in enumerate(lista_valor):
-                sql_query = """
-                INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
-                VALUES (%s, %s, %s, %s, current_timestamp())
-                """
-                val = (fkDispositivo, fkLinha, lista_idComponente[idx], item)
-                mycursor.execute(sql_query, val)
-                mydb.commit()
-                print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
-
-                # Pegando o último idCaptura inserido
-                mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
-                idUltimoDado = mycursor.fetchall()
-                idUltimoDado = idUltimoDado[0][0]
-
-                # Verificando se o valor está fora do limite
-                if lista_variavel[idx] == lista_foraLimite[idx][0]:
-                    descricao = f"{lista_foraLimite[idx][0]} está {lista_foraLimite[idx][3]} do limite de {lista_foraLimite[idx][2]}: valor atual é {lista_foraLimite[idx][1]}"
-
+                for idx, item in enumerate(lista_valor):
                     sql_query = """
-                    INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
-                    VALUES (%s, %s, %s, current_timestamp(), %s, 0);
+                    INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
+                    VALUES (%s, %s, %s, %s, current_timestamp())
                     """
-                    val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
+                    val = (fkDispositivo, fkLinha, lista_idComponente[idx], item)
                     mycursor.execute(sql_query, val)
                     mydb.commit()
-                    print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
+                    print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
 
+                    # Pegando o último idCaptura inserido
+                    mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
+                    idUltimoDado = mycursor.fetchall()
+                    idUltimoDado = idUltimoDado[0][0]
+
+                # Verificar se o item atual está na lista fora do limite
+                    for alerta in lista_foraLimite:
+                        nome_variavel, valor, limite, tipo = alerta
+                        if lista_variavel[idx] == nome_variavel:
+                            descricao = f"{nome_variavel} está {tipo} do limite de {limite}: valor atual é {valor}"
+
+                            sql_query = """
+                            INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
+                            VALUES (%s, %s, %s, current_timestamp(), %s, 0);
+                            """
+                            val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
+                            mycursor.execute(sql_query, val)
+                            mydb.commit()
+                            print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
         else:
             # Inserindo os valores em captura quando não há alertas
             for idx, item in enumerate(lista_valor):
@@ -154,8 +155,7 @@ while True:
                 mydb.commit()
                 print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
 
-        print(f"{mycursor.rowcount} registros inseridos.")
-
+                print(f"{mycursor.rowcount} registros inseridos.")
 
 
         #cada dado de cpu e ram será cadastrado a cada 30 segundos e dessa forma a cada 120 dados pegos, irá inserir um dado de disco (30 segundos = 120 dados em uma hora)
