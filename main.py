@@ -132,14 +132,14 @@ while True:
                 # Verificar se o item atual está na lista fora do limite
                     for alerta in lista_foraLimite:
                         nome_variavel, valor, limite, tipo = alerta
-                        if lista_variavel[idx] == nome_variavel:
+                        if lista_nomeVariavel[idx] == nome_variavel:
                             descricao = f"{nome_variavel} está {tipo} do limite de {limite}: valor atual é {valor}"
 
                             sql_query = """
-                            INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
-                            VALUES (%s, %s, %s, current_timestamp(), %s, 0);
+                            INSERT INTO alerta(fkCaptura, fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
+                            VALUES (%s, %s, %s, %s, current_timestamp(), %s, 0);
                             """
-                            val = [fkDispositivo, idUltimoDado, fkLinha, descricao]
+                            val = [lista_idComponente[idx], fkDispositivo, idUltimoDado, fkLinha, descricao]
                             mycursor.execute(sql_query, val)
                             mydb.commit()
                             print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDado} e descrição = '{descricao}'")
@@ -178,10 +178,10 @@ while True:
                 PercDISCO = psutil.disk_usage('/').percent
 
             sql_query = """
-                INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
-                VALUES (%s, %s, %s, %s, current_timestamp())
+                INSERT INTO captura (fkComponente, fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
+                VALUES (%s,%s, %s, %s, %s, current_timestamp())
                 """
-            val = (fkDispositivo, fkLinha, idComponente, PercDISCO)
+            val = (idComponente, fkDispositivo, fkLinha, idComponente, PercDISCO)
             mycursor.execute(sql_query, val)
             mydb.commit()
             print(f"Dado inserido em 'captura' com fkComponente = {idComponente} e valor = {PercDISCO}")
@@ -194,8 +194,8 @@ while True:
             if(PercDISCO > valor_limite):
                 descricao = f"Porcentual de uso de disco está acima do limite de {valor_limite}: valor atual é {PercDISCO}"
                 
-                sql_query = "INSERT INTO alerta(fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, current_timestamp(), %s, 0);"
-                val = [fkDispositivo, idUltimoDadoDISK, fkLinha, descricao]
+                sql_query = "INSERT INTO alerta(fkComponente, fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, %s, current_timestamp(), %s, 0);"
+                val = [idComponente, fkDispositivo, idUltimoDadoDISK, fkLinha, descricao]
                 mycursor.execute(sql_query, val)
                 mydb.commit()
                 print(f"Dado inserido em 'alerta' com fkCaptura = {idUltimoDadoDISK} e descrição = '{descricao}'")
