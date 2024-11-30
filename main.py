@@ -178,10 +178,10 @@ while True:
                 PercDISCO = psutil.disk_usage('/').percent
 
             sql_query = """
-                INSERT INTO captura (fkComponente, fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
-                VALUES (%s,%s, %s, %s, %s, current_timestamp())
+                INSERT INTO captura (fkDispositivo, fkLinha, fkComponente, registro, dataRegistro)
+                VALUES (%s, %s, %s, %s, current_timestamp())
                 """
-            val = (idComponente, fkDispositivo, fkLinha, idComponente, PercDISCO)
+            val = (fkDispositivo, fkLinha, idComponente, PercDISCO)
             mycursor.execute(sql_query, val)
             mydb.commit()
             print(f"Dado inserido em 'captura' com fkComponente = {idComponente} e valor = {PercDISCO}")
