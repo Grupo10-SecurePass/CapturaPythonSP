@@ -136,7 +136,7 @@ while True:
                             descricao = f"{nome_variavel} está {tipo} do limite de {limite}: valor atual é {valor}"
 
                             sql_query = """
-                            INSERT INTO alerta(fkCaptura, fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
+                            INSERT INTO alerta(fkComponente, fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao)
                             VALUES (%s, %s, %s, %s, current_timestamp(), %s, 0);
                             """
                             val = [lista_idComponente[idx], fkDispositivo, idUltimoDado, fkLinha, descricao]
