@@ -124,15 +124,15 @@ while True:
                     mydb.commit()
                     print(f"Dado inserido em 'captura' com fkComponente = {lista_idComponente[idx]} e valor = {item}")
 
-                    # Pegando o último idCaptura inserido
-                    mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
-                    idUltimoDado = mycursor.fetchall()
-                    idUltimoDado = idUltimoDado[0][0]
-
                 # Verificar se o item atual está na lista fora do limite
                     for alerta in lista_foraLimite:
                         nome_variavel, valor, limite, tipo = alerta
                         if lista_nomeVariavel[idx] == nome_variavel:
+                            # Pegando o último idCaptura inserido
+                            mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
+                            idUltimoDado = mycursor.fetchall()
+                            idUltimoDado = idUltimoDado[0][0]
+
                             descricao = f"{nome_variavel} está {tipo} do limite de {limite}: valor atual é {valor}"
 
                             sql_query = """
@@ -185,13 +185,13 @@ while True:
             mycursor.execute(sql_query, val)
             mydb.commit()
             print(f"Dado inserido em 'captura' com fkComponente = {idComponente} e valor = {PercDISCO}")
-
-            result = mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
-            idUltimoDadoDISK = mycursor.fetchall()
-            idUltimoDadoDISK = idUltimoDadoDISK[0][0]
             
 
             if(PercDISCO > valor_limite):
+                result = mycursor.execute(f"SELECT idCaptura FROM captura ORDER BY idCaptura DESC LIMIT 1;")
+                idUltimoDadoDISK = mycursor.fetchall()
+                idUltimoDadoDISK = idUltimoDadoDISK[0][0]
+
                 descricao = f"Porcentual de uso de disco está acima do limite de {valor_limite}: valor atual é {PercDISCO}"
                 
                 sql_query = "INSERT INTO alerta(fkComponente, fkDispositivo, fkCaptura, fkLinha, dataAlerta, descricao, visualizacao) VALUES (%s, %s, %s, %s, current_timestamp(), %s, 0);"
